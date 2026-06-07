@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.p-calendar,
+.p-inputtext,
+.p-password {
+  width: 100% !important;
+}
+
+.p-paginator .p-dropdown {
+  width: auto !important;
+}
+
+.p-float-label {
+  display: block;
+  width: 100% !important;
+}
+
+.p-float-label > .p-calendar,
+.p-float-label > .p-dropdown,
+.p-float-label > .p-inputtext,
+.p-float-label > .p-password,
+.p-password > .p-icon-field,
+.p-password > .p-icon-field-right{
+  width: 100% !important;
+}
+
+.quotes-table .p-datatable-filter-row .p-inputtext,
+.quotes-table .p-datatable-filter-row .p-dropdown,
+.quotes-table .p-datatable-filter-row .p-dropdown-label,
+.quotes-table .p-datatable-filter-row .p-inputnumber-input,
+.quotes-table .p-datatable-filter-row .p-calendar {
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.5rem;
+  width: 100%;
+  min-width: 0;
+}

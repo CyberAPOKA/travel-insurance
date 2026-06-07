@@ -27,12 +27,30 @@ The API uses Laravel Sanctum bearer tokens. All quote endpoints require authenti
 | `POST` | `/api/auth/login` | Sign in and receive token |
 | `POST` | `/api/auth/logout` | Revoke current token |
 | `GET` | `/api/auth/me` | Current user |
-| `GET` | `/api/quotes` | List saved quotes for the authenticated user |
+| `GET` | `/api/quotes` | List saved quotes (paginated, filterable) |
 | `GET` | `/api/quotes/{id}` | Show a saved quote |
-| `POST` | `/api/quotes` | Calculate and persist a quote for the authenticated user |
+| `POST` | `/api/quotes` | Calculate and persist a quote |
 | `PUT` | `/api/quotes/{id}` | Recalculate and update an existing quote |
 
-Quotes and quote travelers are stored with `user_id` for multi-tenant isolation.
+Quotes and quote travelers are stored with `user_id` for multi-tenant isolation. Quote ownership is enforced through `QuotePolicy`.
+
+### Listing quotes (`GET /api/quotes`)
+
+Query parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `page` | Page number (default: `1`) |
+| `per_page` | Items per page, 1–100 (default: `15`) |
+| `filters` | PrimeReact/DataTable filter meta (JSON object or JSON string) |
+
+Example:
+
+```http
+GET /api/quotes?page=1&per_page=10&filters={"global":{"value":"Ana","matchMode":"contains"}}
+```
+
+Paginated response includes `data`, `links`, and `meta`. The `meta.source` field indicates whether the list came from `database` or `cache` (Redis).
 
 Frontend routes:
 
@@ -57,7 +75,10 @@ Services:
 - User: `laravel`
 - Password: `secret`
 
-Redis is used as Laravel's cache store. Identical quote requests are cached by `CachedQuotePricingService` for one hour (`QUOTE_CACHE_TTL=3600`).
+Redis is used as Laravel's cache store:
+
+- **Pricing cache** — identical quote calculation requests are cached by `CachedQuotePricingService` (`QUOTE_CACHE_TTL=3600`).
+- **List cache** — paginated quote lists are cached by `QuoteListService` (`QUOTE_LIST_CACHE_TTL=300`). Cache is invalidated when quotes are created or updated.
 
 Stop the stack:
 
@@ -68,9 +89,20 @@ docker compose down
 ## Project Structure
 
 ```text
-backend/   Laravel API with pricing business rules and PHPUnit tests
-frontend/  Next.js app with Zustand, Tailwind CSS, i18n, and dark/light theme
+backend/
+  app/
+    Filters/           Reusable DataTable filter types + QuoteListFilter
+    Policies/          QuotePolicy (view/update ownership)
+    Services/Quotes/   Pricing, persistence, list cache
+  tests/               PHPUnit feature and unit tests
+
+frontend/
+  src/
+    features/quotes/   Form, table, API client, quote-specific filters
+    lib/filters/       Reusable PrimeReact filter init, components, serialization
 ```
+
+Stack highlights: Laravel 12, Next.js 16, PrimeReact, Zustand, Laravel Precognition, `next-intl`, Tailwind CSS.
 
 ## How to Run the Backend (Local)
 
@@ -95,7 +127,7 @@ npm run dev
 
 The app will be available at `http://localhost:3000`.
 
-By default, the frontend calls `http://localhost:8000/api`. You can override this with `NEXT_PUBLIC_API_URL` in `frontend/.env.local`.
+By default, the frontend calls `http://localhost:8000/api`. Override with `NEXT_PUBLIC_API_URL` in `frontend/.env.local`.
 
 ## How to Run Tests
 
@@ -125,10 +157,12 @@ npm test
 | Area | What is covered |
 |------|-----------------|
 | `QuotePricingService` | Minimum 5 charged days, single-day trip, age at trip start, senior multiplier, destination rates, adventure sports warning, group discount, full multi-traveler scenario |
-| `CachedQuotePricingService` | Redis/array cache by request payload |
+| `CachedQuotePricingService` | Cache by request payload |
+| `QuoteListService` | List cache hit/miss, invalidation on user quotes change |
+| `QuoteListFilter` | Destination filter + global search (traveler names, dates) |
+| `QuotePolicy` | Owner can view/update; other users denied |
 | `Money` | Half-up rounding |
-| `QuoteController` | Auth required, create/list/show/update, validation, ownership, persistence, pagination |
-| `QuoteFilter` | Destination and search filters |
+| `QuoteController` | Auth, create/list/show/update, validation, ownership, persistence, pagination, list cache source |
 | `QuoteRequestData` | DTO mapping from validated input |
 | `AuthController` | Register, login, invalid credentials |
 | Frontend utils | Quote response parsing, warning translation, form mapping |
@@ -167,7 +201,7 @@ npm test
       "name": "Ana",
       "age": 36,
       "subtotal": 335.5,
-      "applied_add_ons": ["LUGGAGE", "ADVENTURE_SPORTS"]
+      "applied_add_ons": ["ADVENTURE_SPORTS", "LUGGAGE"]
     },
     {
       "name": "John",
@@ -193,19 +227,23 @@ npm test
 
 ## Decisions and Assumptions
 
-- Business rules live in `QuotePricingService`, keeping the controller thin and validation isolated in `StoreQuoteRequest`.
-- List filters live in `QuoteFilter`; the `Quote` model keeps only reusable scopes (`forUser`, `latestForUser`).
-- API responses use `QuoteResource`, `QuoteListResource`, and `QuoteTravelerResource` instead of controller transforms.
+- Business rules live in `QuotePricingService`; the controller only orchestrates validation, pricing, and persistence.
+- List filters use `QuoteListFilter` + `DataTableFilterService` (PrimeReact filter meta format). The `Quote` model keeps only reusable scopes (`forUser`, `latestForUser`).
+- Authorization uses `QuotePolicy` (`view`, `update`) instead of inline controller checks.
+- API responses use `QuoteResource`, `QuoteListResource`, and `QuoteTravelerResource`.
 - Request mapping to DTOs uses `QuoteRequestData::fromArray()`.
-- Quote listing uses server-side pagination (`per_page`, default 15) instead of loading all records with `get()`.
+- Quote listing is server-side paginated (`page`, `per_page`, default 15) with optional `filters` in DataTable format.
+- List responses expose `meta.source` (`database` | `cache`) so clients know if Redis served the result.
 - PHP enums represent destination zones and add-ons to avoid magic strings.
 - DTOs carry request and response data explicitly without overusing abstractions.
-- `Money::roundHalfUp()` centralizes final rounding while intermediate calculations keep full precision.
-- Traveler subtotals are rounded only for presentation; the final total uses raw traveler subtotals before discount.
-- Applied add-ons preserve the request order among add-ons that were actually applied.
-- Adventure sports rejection is treated as a warning, not a validation error.
-- Quote responses are cached in Redis through `CachedQuotePricingService`, keyed by the normalized request payload with a configurable TTL.
-- The frontend uses [PrimeReact](https://primereact.org/installation/) for UI components, Zustand for auth/theme state, Laravel Precognition for live validation, `next-intl` for English and Portuguese, and theme switching between Lara light/dark themes.
+- `Money::roundHalfUp()` centralizes final rounding; intermediate calculations keep full precision.
+- Traveler subtotals are rounded for presentation; the group total uses raw (unrounded) subtotals before discount.
+- Applied add-ons are recorded in calculation order (`ADVENTURE_SPORTS` before `LUGGAGE`) among add-ons that were actually applied.
+- Adventure sports rejection is a warning, not a validation error.
+- Pricing results are cached in Redis via `CachedQuotePricingService`, keyed by normalized request payload.
+- Paginated quote lists are cached via `QuoteListService` and invalidated when quotes are created or updated.
+- Frontend filters mirror the backend: reusable pieces in `frontend/src/lib/filters/`, quote table config in `features/quotes/filters/`.
+- UI uses [PrimeReact](https://primereact.org/) (including Advanced Filter + standard paginator on `QuotesTable`), Zustand for auth/theme, Laravel Precognition for live validation, `next-intl` for EN/PT, and Lara light/dark themes with SSR-safe theme cookie.
 - Quotes are persisted in MySQL with travelers, warnings, and calculation breakdown. Creating a quote redirects to `/quotes/{id}` so subsequent saves update the same record.
 - Docker Compose runs backend, frontend, MySQL, Redis, and phpMyAdmin together for local development.
 
@@ -222,13 +260,13 @@ npm test
 | Full scenario with multiple travelers and add-ons | Done | Unit + feature tests (Ana/John, Europe, 852.5 total) |
 | Isolated pricing service | Done | `QuotePricingService` / `CachedQuotePricingService` |
 | Backend input validation | Done | `StoreQuoteRequest`, `IndexQuoteRequest`, feature tests |
-| PHPUnit unit tests for pricing | Done | `tests/Unit/Services/Quotes/QuotePricingServiceTest.php` (9 tests) |
+| PHPUnit unit tests for pricing | Done | `QuotePricingServiceTest.php` (8 tests) |
 | Frontend consuming API with state management | Done | Zustand auth store, Precognition forms, quote pages |
 | README with setup + decisions | Done | This file |
-| **Differentiators:** DB persistence + list endpoint | Done | MySQL, `GET /api/quotes`, `QuotesTable` |
+| **Differentiators:** DB persistence + list endpoint | Done | MySQL, `GET /api/quotes`, `QuotesTable` with filters |
 | **Differentiators:** Docker Compose | Done | `docker-compose.yml` |
 | **Differentiators:** Loading/error states | Done | Spinners, `Message`, auth redirects, table error handling |
-| Automated tests beyond pricing unit tests | Done | Feature tests (auth/quotes), frontend Vitest utils |
+| Automated tests beyond pricing unit tests | Done | Feature tests, filter/list cache/policy tests, frontend Vitest |
 
 Field names differ slightly from the challenge suggestion (`start_date` instead of `data_inicio`, etc.), but the response includes charged days, per-traveler subtotals, warnings, group discount, and final total as required.
 
@@ -237,6 +275,7 @@ Field names differ slightly from the challenge suggestion (`start_date` instead 
 - Email verification and password reset flows
 - Admin panel or rate configuration UI
 - End-to-end browser tests (Playwright/Cypress)
+- Money as integer cents (float half-up is used; sufficient for this scope)
 
 ## Suggested Git Commits
 

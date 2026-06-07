@@ -4,12 +4,12 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "laravel-precognition-react";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
 import { FloatLabel } from "primereact/floatlabel";
 import { Message } from "primereact/message";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { DateCalendar } from "@/components/ui/DateCalendar";
 import {
   FieldError,
   asFormLike,
@@ -46,7 +46,6 @@ export function QuoteForm({ quoteId, initialQuote }: QuoteFormProps = {}) {
   const t = useTranslations();
   const router = useRouter();
   const {
-    calendarDateFormat,
     parseApiDate,
     toApiDate,
     startOfToday,
@@ -157,7 +156,7 @@ export function QuoteForm({ quoteId, initialQuote }: QuoteFormProps = {}) {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mt-2">
               <div>
                 <FloatLabel>
-                  <Calendar
+                  <DateCalendar
                     inputId="start-date"
                     value={parseApiDate(form.data.start_date)}
                     minDate={today}
@@ -181,8 +180,6 @@ export function QuoteForm({ quoteId, initialQuote }: QuoteFormProps = {}) {
                         }
                       }
                     }}
-                    dateFormat={calendarDateFormat}
-                    showIcon
                     className={fieldClassName(asFormLike(form), "start_date")}
                   />
                   <label htmlFor="start-date">{t("form.startDate")}</label>
@@ -191,7 +188,7 @@ export function QuoteForm({ quoteId, initialQuote }: QuoteFormProps = {}) {
               </div>
               <div>
                 <FloatLabel>
-                  <Calendar
+                  <DateCalendar
                     inputId="end-date"
                     value={parseApiDate(form.data.end_date)}
                     minDate={minEndDate}
@@ -203,8 +200,6 @@ export function QuoteForm({ quoteId, initialQuote }: QuoteFormProps = {}) {
                         form.validate("end_date");
                       }
                     }}
-                    dateFormat={calendarDateFormat}
-                    showIcon
                     className={fieldClassName(asFormLike(form), "end_date")}
                   />
                   <label htmlFor="end-date">{t("form.endDate")}</label>

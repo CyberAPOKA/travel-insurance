@@ -9,17 +9,20 @@ use App\Enums\DestinationZone;
 use App\Services\Quotes\QuotePricingService;
 use Carbon\Carbon;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\Support\CreatesQuotePricingService;
 use Tests\TestCase;
 
 class QuotePricingServiceTest extends TestCase
 {
+    use CreatesQuotePricingService;
+
     private QuotePricingService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->service = new QuotePricingService;
+        $this->service = $this->makeQuotePricingService();
     }
 
     #[Test]

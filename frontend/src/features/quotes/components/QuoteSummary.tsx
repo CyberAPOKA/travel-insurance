@@ -11,6 +11,7 @@ import { useFormat } from "@/lib/hooks/useFormat";
 import type { QuoteResponse } from "../types/quote";
 import { quoteWarningKey, translateQuoteWarning } from "../utils/quoteWarnings";
 import { QuoteCalculationModal } from "./QuoteCalculationModal";
+import { QuotePixPayment } from "./QuotePixPayment";
 
 interface QuoteSummaryProps {
   quote: QuoteResponse | null;
@@ -109,6 +110,12 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
         <div className="flex justify-between text-xl font-bold">
           <span>{t("summary.finalTotal")}</span>
           <span>{formatCurrency(quote.final_total)}</span>
+        </div>
+        <div>
+          <QuotePixPayment
+            quoteId={quote.id}
+            initialPayment={quote.payment}
+          />
         </div>
       </Card>
 

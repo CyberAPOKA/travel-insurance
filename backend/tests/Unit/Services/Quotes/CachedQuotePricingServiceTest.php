@@ -7,14 +7,16 @@ use App\DTO\TravelerInput;
 use App\Enums\DestinationZone;
 use App\Services\Quotes\CachedQuotePricingService;
 use App\Services\Quotes\QuoteCacheKey;
-use App\Services\Quotes\QuotePricingService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\Support\CreatesQuotePricingService;
 use Tests\TestCase;
 
 class CachedQuotePricingServiceTest extends TestCase
 {
+    use CreatesQuotePricingService;
+
     #[Test]
     public function it_caches_quote_results_by_request_payload(): void
     {
@@ -33,7 +35,7 @@ class CachedQuotePricingServiceTest extends TestCase
             ],
         );
 
-        $service = new CachedQuotePricingService(new QuotePricingService);
+        $service = new CachedQuotePricingService($this->makeQuotePricingService());
 
         $firstResult = $service->calculate($request);
         $secondResult = $service->calculate($request);

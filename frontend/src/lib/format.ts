@@ -14,6 +14,9 @@ const CALENDAR_DATE_FORMAT: Record<AppLocale, string> = {
   pt: "dd/mm/yy",
 };
 
+/** PrimeReact InputMask pattern for manual date entry (dd/mm/yyyy or mm/dd/yyyy). */
+export const CALENDAR_INPUT_MASK = "99/99/9999";
+
 export function normalizeAppLocale(locale: string): AppLocale {
   return locale === "pt" ? "pt" : "en";
 }
@@ -24,6 +27,10 @@ export function resolveIntlLocale(locale: string): string {
 
 export function getCalendarDateFormat(locale: string): string {
   return CALENDAR_DATE_FORMAT[normalizeAppLocale(locale)];
+}
+
+export function getCalendarInputMask(): string {
+  return CALENDAR_INPUT_MASK;
 }
 
 /** Returns today at local midnight — useful as Calendar minDate. */

@@ -2,11 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
 import { FloatLabel } from "primereact/floatlabel";
 import { InputText } from "primereact/inputtext";
 import { Panel } from "primereact/panel";
+import { DateCalendar } from "@/components/ui/DateCalendar";
 import {
   FieldError,
   fieldClassName,
@@ -45,8 +45,7 @@ export function TravelerForm({
   onRemove,
 }: TravelerFormProps) {
   const t = useTranslations();
-  const { calendarDateFormat, parseApiDate, toApiDate, startOfToday } =
-    useFormat();
+  const { parseApiDate, toApiDate, startOfToday } = useFormat();
   const today = startOfToday();
   const addOnOptions = buildAddOnOptions(ADD_ONS, t);
   const nameField = `travelers.${index}.name`;
@@ -108,7 +107,7 @@ export function TravelerForm({
         </div>
         <div>
           <FloatLabel>
-            <Calendar
+            <DateCalendar
               inputId={`traveler-birth-${index}`}
               value={parseApiDate(traveler.birth_date)}
               maxDate={today}
@@ -119,8 +118,6 @@ export function TravelerForm({
                   form.validate(birthDateField);
                 }
               }}
-              dateFormat={calendarDateFormat}
-              showIcon
               className={fieldClassName(form, birthDateField)}
             />
             <label htmlFor={`traveler-birth-${index}`}>

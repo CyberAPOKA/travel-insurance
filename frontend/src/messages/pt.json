@@ -86,7 +86,33 @@
     "travelersCount": "Quantidade de viajantes",
     "groupSubtotal": "Subtotal do grupo (antes do desconto)",
     "discountAmount": "Valor do desconto",
-    "rounding": "Arredondamento"
+    "rounding": "Arredondamento",
+    "payment": {
+      "title": "Pagamento PIX",
+      "saveQuoteFirst": "Salve a cotação para gerar o pagamento PIX.",
+      "generatePix": "Gerar QR Code PIX",
+      "generating": "Gerando PIX...",
+      "refreshPix": "Atualizar QR Code PIX",
+      "refreshPixExpired": "Gerar novo QR Code PIX",
+      "copyPasteLabel": "PIX copia e cola",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "qrAlt": "QR Code PIX",
+      "expiresAt": "Expira em",
+      "expiresIn": "Expira em",
+      "expired": "QR Code PIX expirado",
+      "paidMessage": "Pagamento confirmado. Esta cotação já foi paga.",
+      "loadError": "Não foi possível carregar o status do pagamento.",
+      "createError": "Não foi possível gerar o pagamento PIX.",
+      "sandboxNotice": "Modo sandbox: este QR Code PIX não pode ser pago em apps reais (PicPay, Nubank, etc.). Use o Asaas em produção com chave PIX cadastrada, ou simule o pagamento pela API sandbox do Asaas.",
+      "testChargeNotice": "Ambiente de testes: o PIX cobra {chargeAmount} ({percentage}% do total de {quoteTotal}). O valor exibido na cotação permanece inalterado.",
+      "status": {
+        "pending": "Aguardando pagamento",
+        "paid": "Pago",
+        "overdue": "Vencido",
+        "cancelled": "Cancelado"
+      }
+    }
   },
   "errors": {
     "generic": "Algo deu errado. Tente novamente.",

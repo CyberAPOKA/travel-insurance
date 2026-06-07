@@ -1,4 +1,5 @@
 import { ADD_ONS, DESTINATION_ZONES } from "@/lib/constants";
+import type { QuotePayment } from "./payment";
 
 export type DestinationZone = (typeof DESTINATION_ZONES)[number];
 export type AddOn = (typeof ADD_ONS)[number];
@@ -108,6 +109,7 @@ export interface QuoteResponse {
   final_total: number;
   created_at?: string;
   calculation_breakdown?: QuoteCalculationBreakdown | null;
+  payment?: QuotePayment | null;
 }
 
 export type QuoteListItem = Required<

@@ -46,7 +46,7 @@ class QuoteController extends Controller
         $result = $this->quotePricingService->calculate($quoteRequest);
         $quote = $this->quotePersistenceService->store($request->user(), $quoteRequest, $result);
 
-        return QuoteResource::make($quote->load('travelers'))
+        return QuoteResource::make($quote->load(['travelers', 'payment']))
             ->response()
             ->setStatusCode(201);
     }
@@ -55,7 +55,7 @@ class QuoteController extends Controller
     {
         $this->authorize('view', $quote);
 
-        return QuoteResource::make($quote->load('travelers'));
+        return QuoteResource::make($quote->load(['travelers', 'payment']));
     }
 
     public function update(StoreQuoteRequest $request, Quote $quote): QuoteResource
@@ -66,6 +66,6 @@ class QuoteController extends Controller
         $result = $this->quotePricingService->calculate($quoteRequest);
         $quote = $this->quotePersistenceService->update($quote, $quoteRequest, $result);
 
-        return QuoteResource::make($quote->load('travelers'));
+        return QuoteResource::make($quote->load(['travelers', 'payment']));
     }
 }

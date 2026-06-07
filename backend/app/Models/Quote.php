@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Quote extends Model
 {
@@ -40,6 +41,11 @@ class Quote extends Model
     public function travelers(): HasMany
     {
         return $this->hasMany(QuoteTraveler::class);
+    }
+
+    public function payment(): HasOne
+    {
+        return $this->hasOne(QuotePayment::class);
     }
 
     /**

@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Quote;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\Quote */
+/** @mixin Quote */
 class QuoteResource extends JsonResource
 {
     /**
@@ -25,6 +26,12 @@ class QuoteResource extends JsonResource
             'final_total' => (float) $this->final_total,
             'created_at' => $this->created_at?->toISOString(),
             'calculation_breakdown' => $this->calculation_breakdown,
+            'payment' => $this->when(
+                $this->relationLoaded('payment'),
+                fn () => $this->payment
+                    ? QuotePaymentResource::make($this->payment)->resolve()
+                    : null,
+            ),
         ];
     }
 }

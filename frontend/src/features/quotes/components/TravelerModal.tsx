@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
 import { Dialog } from "primereact/dialog";
 import { FloatLabel } from "primereact/floatlabel";
 import { InputText } from "primereact/inputtext";
+import { DateCalendar } from "@/components/ui/DateCalendar";
 import { useFormat } from "@/lib/hooks/useFormat";
 import { ADD_ONS } from "@/lib/constants";
 import type { AddOn } from "../types/quote";
@@ -41,8 +41,7 @@ export function TravelerModal({
   onSave,
 }: TravelerModalProps) {
   const t = useTranslations();
-  const { calendarDateFormat, parseApiDate, toApiDate, startOfToday } =
-    useFormat();
+  const { parseApiDate, toApiDate, startOfToday } = useFormat();
   const today = startOfToday();
   const addOnOptions = buildAddOnOptions(ADD_ONS, t);
   const [draft, setDraft] = useState<TravelerInput>(initialValue);
@@ -159,7 +158,7 @@ export function TravelerModal({
 
         <div>
           <FloatLabel>
-            <Calendar
+            <DateCalendar
               inputId="traveler-modal-birth"
               value={parseApiDate(draft.birth_date)}
               maxDate={today}
@@ -173,8 +172,6 @@ export function TravelerModal({
                   }));
                 }
               }}
-              dateFormat={calendarDateFormat}
-              showIcon
               className={`w-full${errors.birth_date ? " p-invalid" : ""}`}
             />
             <label htmlFor="traveler-modal-birth">{t("form.birthDate")}</label>

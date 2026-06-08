@@ -116,6 +116,21 @@ php artisan serve
 
 The API will be available at `http://localhost:8000`.
 
+For local development, `cp .env.example .env` and `php artisan key:generate` are enough to run quotes, auth, and listing. You do not need to configure Asaas to use the core API.
+
+### Optional: Asaas PIX (payment testing)
+
+PIX payment is optional. Configure these variables in `backend/.env` only if you want to generate QR Codes and test the Asaas integration:
+
+Example (sandbox):
+
+```env
+ASAAS_BASE_URL=https://api-sandbox.asaas.com/v3
+ASAAS_API_KEY="your_sandbox_api_key"
+ASAAS_WEBHOOK_TOKEN=your_webhook_secret
+QUOTE_PIX_CHARGE_PERCENTAGE=0.1
+```
+
 ## How to Run the Frontend (Local)
 
 ```bash

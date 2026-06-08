@@ -104,6 +104,7 @@
       "paidMessage": "Payment confirmed. This quote has been paid.",
       "loadError": "Unable to load payment status.",
       "createError": "Unable to generate PIX payment.",
+      "configurationError": "PIX payment is not configured. Set ASAAS_API_KEY in the backend environment to enable this feature.",
       "sandboxNotice": "Sandbox mode: this PIX QR Code cannot be paid with real apps (PicPay, Nubank, etc.). Use Asaas production with a registered PIX key, or simulate payment via Asaas sandbox API.",
       "testChargeNotice": "Test environment: PIX charges {chargeAmount} ({percentage}% of the {quoteTotal} total). The quote total shown above is unchanged.",
       "status": {

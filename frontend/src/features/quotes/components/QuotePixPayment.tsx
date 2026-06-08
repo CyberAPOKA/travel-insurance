@@ -9,8 +9,8 @@ import { Tag } from "primereact/tag";
 import { useFormat } from "@/lib/hooks/useFormat";
 import {
   createQuotePayment,
-  extractApiErrorMessage,
   fetchQuotePayment,
+  resolvePixPaymentErrorMessage,
 } from "../services/paymentApi";
 import { usePixExpirationCountdown } from "../hooks/usePixExpirationCountdown";
 import type { QuotePayment } from "../types/payment";
@@ -54,7 +54,12 @@ export function QuotePixPayment({
       setPayment(response.payment);
       setError(null);
     } catch (loadError) {
-      setError(extractApiErrorMessage(loadError) || t("loadError"));
+      setError(
+        resolvePixPaymentErrorMessage(loadError, {
+          configuration: t("configurationError"),
+          fallback: t("loadError"),
+        }),
+      );
     }
   }, [quoteId, t]);
 
@@ -94,7 +99,12 @@ export function QuotePixPayment({
       const response = await createQuotePayment(quoteId);
       setPayment(response.payment);
     } catch (createError) {
-      setError(extractApiErrorMessage(createError) || t("createError"));
+      setError(
+        resolvePixPaymentErrorMessage(createError, {
+          configuration: t("configurationError"),
+          fallback: t("createError"),
+        }),
+      );
     } finally {
       setLoading(false);
     }

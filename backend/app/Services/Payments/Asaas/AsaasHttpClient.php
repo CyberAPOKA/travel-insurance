@@ -9,6 +9,8 @@ class AsaasHttpClient
 {
     public function get(string $path): array
     {
+        $this->ensureConfigured();
+
         $response = $this->client()->get($this->url($path));
 
         if (! $response->successful()) {
@@ -25,6 +27,8 @@ class AsaasHttpClient
      */
     public function post(string $path, array $payload): array
     {
+        $this->ensureConfigured();
+
         $response = $this->client()->post($this->url($path), $payload);
 
         if (! $response->successful()) {
@@ -34,6 +38,16 @@ class AsaasHttpClient
         $data = $response->json();
 
         return is_array($data) ? $data : [];
+    }
+
+    private function ensureConfigured(): void
+    {
+        if (blank(config('services.asaas.api_key'))) {
+            throw new AsaasApiException(
+                'PIX payment provider is not configured.',
+                503,
+            );
+        }
     }
 
     private function client(): PendingRequest

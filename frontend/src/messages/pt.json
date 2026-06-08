@@ -104,6 +104,7 @@
       "paidMessage": "Pagamento confirmado. Esta cotação já foi paga.",
       "loadError": "Não foi possível carregar o status do pagamento.",
       "createError": "Não foi possível gerar o pagamento PIX.",
+      "configurationError": "Pagamento PIX não está configurado. Defina ASAAS_API_KEY no ambiente do backend para habilitar esta funcionalidade.",
       "sandboxNotice": "Modo sandbox: este QR Code PIX não pode ser pago em apps reais (PicPay, Nubank, etc.). Use o Asaas em produção com chave PIX cadastrada, ou simule o pagamento pela API sandbox do Asaas.",
       "testChargeNotice": "Ambiente de testes: o PIX cobra {chargeAmount} ({percentage}% do total de {quoteTotal}). O valor exibido na cotação permanece inalterado.",
       "status": {

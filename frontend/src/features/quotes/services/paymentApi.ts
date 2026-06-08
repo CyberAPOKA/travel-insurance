@@ -21,4 +21,26 @@ export async function createQuotePayment(
   return response.data;
 }
 
+const ASAAS_CONFIGURATION_ERROR_PATTERNS = [
+  /access_token/i,
+  /autentica/i,
+  /not configured/i,
+  /não está configurado/i,
+];
+
+export function resolvePixPaymentErrorMessage(
+  error: unknown,
+  messages: { configuration: string; fallback: string },
+): string {
+  const raw = extractApiErrorMessage(error);
+
+  if (
+    ASAAS_CONFIGURATION_ERROR_PATTERNS.some((pattern) => pattern.test(raw))
+  ) {
+    return messages.configuration;
+  }
+
+  return raw || messages.fallback;
+}
+
 export { extractApiErrorMessage };
